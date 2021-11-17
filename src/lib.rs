@@ -7,10 +7,20 @@ where
     <T as InputTakeAtPosition>::Item: AsChar,
 {
     input.split_at_position_complete(|item| {
-        let x = item.as_char();
-        !matches!(x, 'A'..='Z' | 'a'..='z' |'0'..='9'|'-'|'_')
+        !matches!(item.as_char(), 'A'..='Z' | 'a'..='z' |'0'..='9'|'-'|'_')
     })
 }
+
+pub fn slash<T, E: ParseError<T>>(input: T) -> IResult<T, T, E>
+    where
+        T: InputTakeAtPosition,
+        <T as InputTakeAtPosition>::Item: AsChar,
+{
+    input.split_at_position_complete(|item| {
+        !matches!(item.as_char(), '/')
+    })
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -18,10 +28,19 @@ mod tests {
 
     #[test]
     fn test_key() {
-        fn key_demo(input: &str) -> IResult<&str, &str> {
+        fn key_fn(input: &str) -> IResult<&str, &str> {
             let x = key(input)?;
             Ok(x)
         }
-        assert_eq!(Ok(("/tweet/1", "twitter")), key_demo("twitter/tweet/1"))
+        assert_eq!(Ok(("/tweet/1", "twitter")), key_fn("twitter/tweet/1"))
+    }
+
+    #[test]
+    fn test_slash() {
+        fn slash_fn(input: &str) -> IResult<&str, &str> {
+            let x = slash(input)?;
+            Ok(x)
+        }
+        assert_eq!(Ok(("", "/")), slash_fn("/"))
     }
 }
